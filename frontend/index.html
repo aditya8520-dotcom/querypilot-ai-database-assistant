@@ -1,0 +1,3049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Voice Database Assistant</title>
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+
+    color-scheme: dark;
+
+    --bg: #080b16;
+
+    --panel: rgba(17, 24, 43, .88);
+
+    --panel-soft: #111a2e;
+
+    --border: rgba(148, 163, 184, .16);
+
+    --text: #edf3ff;
+
+    --muted: #91a0bb;
+
+    --blue: #65a8ff;
+
+    --cyan: #61e6df;
+
+    --purple: #9b8cff;
+
+    --green: #4adea5;
+
+    --red: #fb7185;
+
+}
+
+* { box-sizing: border-box; }
+
+html { min-height: 100%; background: var(--bg); }
+
+body {
+
+    margin: 0;
+
+    min-height: 100vh;
+
+    padding: 34px 0 56px;
+
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+    color: var(--text);
+
+    background:
+
+        radial-gradient(ellipse at 12% 0%, rgba(48, 93, 190, .20), transparent 34%),
+
+        radial-gradient(ellipse at 92% 12%, rgba(111, 70, 204, .16), transparent 30%),
+
+        linear-gradient(145deg, #080b16 0%, #0b1120 52%, #090d19 100%);
+
+}
+
+.container { width: min(1100px, 92%); margin: 0 auto; }
+
+h1 {
+
+    margin: 0;
+
+    text-align: center;
+
+    font-size: clamp(28px, 4vw, 42px);
+
+    font-weight: 800;
+
+    letter-spacing: -1.6px;
+
+    line-height: 1.2;
+
+    background: linear-gradient(100deg, #f4f7ff 15%, #93c5fd 52%, #b9a7ff 90%);
+
+    -webkit-background-clip: text;
+
+    background-clip: text;
+
+    color: transparent;
+
+}
+
+.subtitle {
+
+    text-align: center;
+
+    color: var(--muted);
+
+    margin: 12px 0 32px;
+
+    font-size: 14px;
+
+    line-height: 1.7;
+
+}
+
+.card, .input-area, .box {
+
+    background: linear-gradient(145deg, rgba(18, 27, 47, .96), rgba(13, 20, 36, .96));
+
+    border: 1px solid var(--border);
+
+    border-radius: 18px;
+
+    box-shadow: 0 18px 48px rgba(0, 0, 0, .18), inset 0 1px 0 rgba(255,255,255,.025);
+
+}
+
+.card { padding: 26px; margin-bottom: 24px; }
+
+.card h2 { margin: 0 0 18px; font-size: 17px; font-weight: 700; text-align: left; letter-spacing: -.3px; }
+
+input, textarea {
+
+    width: 100%;
+
+    padding: 14px 15px;
+
+    margin-top: 10px;
+
+    border: 1px solid rgba(148, 163, 184, .20);
+
+    border-radius: 11px;
+
+    background: rgba(5, 10, 22, .66);
+
+    color: var(--text);
+
+    font: inherit;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition: border-color .2s, box-shadow .2s, *background* .2s;
+
+}
+
+input:focus, textarea:focus {
+
+    border-color: rgba(101, 168, 255, .8);
+
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, .13);
+
+    background: rgba(7, 14, 29, .95);
+
+}
+
+input::placeholder, textarea::placeholder { color: #71809d; }
+
+button {
+
+    border: 1px solid transparent;
+
+    border-radius: 11px;
+
+    color: #f7f9ff;
+
+    cursor: pointer;
+
+    font: inherit;
+
+    font-size: 13px;
+
+    font-weight: 650;
+
+    transition: transform .18s ease, filter .18s ease, border-color .18s ease, *background* .18s ease;
+
+}
+
+button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+button:active { transform: translateY(0); }
+
+button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+
+.connect-button {
+
+    width: 100%; margin-top: 16px; padding: 14px;
+
+    background: linear-gradient(100deg, #347cf6, #6557e8);
+
+    box-shadow: 0 8px 24px rgba(62, 102, 239, .22);
+
+}
+
+.disconnect-button {
+
+    width: 100%; margin-top: 10px; padding: 13px;
+
+    background: rgba(190, 42, 71, .13);
+
+    border-color: rgba(251, 113, 133, .25);
+
+    color: #ff9aaa;
+
+}
+
+#databaseStatus {
+
+    text-align: left; margin-top: 16px; padding: 12px 14px;
+
+    color: var(--muted); line-height: 1.6; white-space: pre-wrap;
+
+    background: rgba(5, 10, 22, .4); border: 1px solid var(--border); border-radius: 10px;
+
+    font-size: 13px;
+
+}
+
+.connected, .success { color: var(--green) !important; }
+
+.error { color: var(--red) !important; }
+
+.warning { color: #fbbf24 !important; }
+
+.mode-buttons { display: flex; gap: 10px; margin: 0 0 18px; }
+
+.mode-button { flex: 1; padding: 13px 18px; background: rgba(18, 27, 47, .8); border-color: var(--border); color: #b8c4db; }
+
+.mode-button:hover { background: #1a2741; }
+
+.mode-button.active {
+
+    color: #f7faff; border-color: rgba(101, 168, 255, .42);
+
+    background: linear-gradient(100deg, rgba(49, 112, 231, .26), rgba(120, 91, 229, .22));
+
+    box-shadow: inset 0 0 0 1px rgba(101, 168, 255, .08);
+
+}
+
+.input-area { padding: 18px; }
+
+.question-input { min-height: 94px; resize: vertical; font-size: 15px; line-height: 1.65; }
+
+.input-buttons { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+
+.send-button, .mic-on-button, .mic-off-button { padding: 12px 18px; }
+
+.send-button { background: linear-gradient(100deg, #347cf6, #6557e8); }
+
+.mic-on-button { background: rgba(16, 185, 129, .14); color: #6ee7b7; border-color: rgba(74, 222, 128, .24); }
+
+.mic-off-button { background: rgba(190, 42, 71, .13); color: #ff9aaa; border-color: rgba(251, 113, 133, .24); }
+
+.mic-on-button.active { box-shadow: 0 0 0 3px rgba(74, 222, 128, .16), 0 0 26px rgba(74, 222, 128, .10); }
+
+#status {
+
+    color: var(--muted); margin: 16px 2px; min-height: 22px;
+
+    font-size: 13px; line-height: 1.6;
+
+}
+
+.box { margin-top: 18px; padding: 22px; }
+
+.hidden { display: none !important; }
+
+.label {
+
+    display: flex; align-items: center; gap: 9px;
+
+    color: #a9caff; font-weight: 700; font-size: 14px;
+
+    letter-spacing: .1px; margin-bottom: 14px;
+
+}
+
+#question, #answer { color: #dce6f8; line-height: 1.8; white-space: pre-wrap; word-break: break-word; font-size: 14px; }
+
+#sql {
+
+    color: var(--cyan); font-family: "JetBrains Mono", Consolas, monospace;
+
+    font-size: 13px; line-height: 1.8; white-space: pre-wrap; word-break: break-word;
+
+    background: #070c17; padding: 18px; border-radius: 12px;
+
+    border: 1px solid rgba(97, 230, 223, .17); overflow-x: auto;
+
+}
+
+.result-summary { margin-bottom: 14px; color: var(--muted); font-size: 13px; }
+
+.table-wrapper { width: 100%; overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+
+table { width: 100%; border-collapse: collapse; min-width: 550px; background: rgba(7, 12, 23, .5); }
+
+th, td { padding: 13px 15px; text-align: left; border-bottom: 1px solid rgba(148, 163, 184, .12); white-space: nowrap; font-size: 13px; }
+
+th { background: rgba(57, 88, 151, .2); color: #a9caff; font-weight: 700; }
+
+td { color: #d7e0f1; }
+
+tr:hover td { background: rgba(101, 168, 255, .055); }
+
+.empty-table { padding: 22px; text-align: center; color: var(--muted); font-size: 13px; }
+
+.schema-info { margin-top: 14px; padding: 13px 14px; background: rgba(5, 10, 22, .48); border: 1px solid var(--border); border-radius: 10px; color: #9aabc7; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+
+.chart-wrapper { position: relative; width: 100%; height: 360px; background: rgba(5, 10, 22, .5); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+
+.chart-message { color: var(--muted); text-align: center; padding: 20px; }
+
+.history-list { display: flex; flex-direction: column; gap: 12px; max-height: 420px; overflow-y: auto; }
+
+.history-item { background: rgba(5, 10, 22, .45); border: 1px solid var(--border); border-radius: 12px; padding: 15px; }
+
+.history-question { color: #a9caff; font-weight: 700; margin-bottom: 8px; font-size: 13px; }
+
+.history-answer { color: #dce6f8; line-height: 1.65; font-size: 13px; }
+
+.history-sql { margin-top: 10px; color: var(--cyan); font-family: "JetBrains Mono", Consolas, monospace; font-size: 12px; line-height: 1.65; white-space: pre-wrap; word-break: break-word; }
+
+.history-empty { color: var(--muted); text-align: center; padding: 16px; font-size: 13px; }
+
+::selection { background: rgba(101, 168, 255, .3); }
+
+@media (min-width: 900px) {
+
+    .card { padding: 28px 30px; }
+
+    .card input { display: inline-block; width: calc(50% - 7px); }
+
+    .card input:nth-of-type(odd) { margin-right: 8px; }
+
+}
+
+@media (max-width: 650px) {
+
+    body { padding: 20px 0 34px; }
+
+    .container { width: 94%; }
+
+    h1 { letter-spacing: -1px; }
+
+    .subtitle { margin-bottom: 24px; }
+
+    .card { padding: 18px; }
+
+    .mode-buttons { flex-direction: column; }
+
+    .mode-button { width: 100%; }
+
+    .input-buttons { display: grid; grid-template-columns: 1fr 1fr; }
+
+    .send-button { grid-column: 1 / -1; }
+
+    .send-button, .mic-on-button, .mic-off-button { width: 100%; }
+
+    .box { padding: 17px; }
+
+    .chart-wrapper { height: 290px; padding: 10px; }
+
+}
+
+\n/* ===== QueryPilot polished dashboard layer ===== */
+
+:root{--bg:#080d19;--panel:#101a2c;--panel2:#0c1526;--border:rgba(148,163,184,.17);--text:#edf4ff;--muted:#91a3bf;--accent:#668cff;--cyan:#65e5dc;}
+
+html,body{min-height:100%;background:#080d19!important;color:var(--text)!important}
+
+body{padding:0!important;margin:0!important;min-height:100vh;background:radial-gradient(ellipse at 78% 0%,rgba(91,72,190,.18),transparent 34%),radial-gradient(ellipse at 18% 12%,rgba(43,108,207,.15),transparent 30%),#080d19!important}
+
+.qp-sidebar{position:fixed;inset:0 auto 0 0;width:248px;padding:28px 17px 18px;background:#0a1221;border-right:1px solid rgba(148,163,184,.14);display:flex;flex-direction:column;z-index:20;color:#eaf1ff}
+
+.qp-brand{display:flex;align-items:center;gap:12px;padding:0 10px 42px}.qp-brand-mark{width:39px;height:39px;border-radius:12px;background:linear-gradient(135deg,#4489ff,#7657e9);display:grid;place-items:center;font-size:23px;color:white;box-shadow:0 8px 22px #4c6ee744}.qp-brand strong{display:block;font-size:16px;letter-spacing:-.3px}.qp-brand span{display:block;color:#7186a7;font-size:9px;letter-spacing:1.5px;margin-top:4px}
+
+.qp-nav-label{font-size:10px;font-weight:800;letter-spacing:1.7px;color:#647895;padding:0 13px 12px}.qp-nav{height:44px;padding:0 13px;margin:3px 0;border-radius:11px;display:flex;align-items:center;gap:13px;color:#9db0cc;text-decoration:none;font-size:13px;font-weight:650;transition:.18s}.qp-nav:hover,.qp-nav.active{background:linear-gradient(100deg,rgba(63,119,238,.22),rgba(120,87,226,.17));color:#f2f6ff}.qp-nav.active{box-shadow:inset 2px 0 #69a5ff}.qp-db-label{margin-top:35px}.qp-sidebar-footer{margin-top:auto;border:1px solid rgba(148,163,184,.15);border-radius:13px;padding:13px 12px;display:flex;align-items:center;gap:10px;color:#cbd8ed;font-size:11px}.qp-sidebar-footer strong,.qp-sidebar-footer small{display:block}.qp-sidebar-footer small{color:#8193af;margin-top:4px}.qp-live-dot,.qp-env i{width:7px;height:7px;border-radius:50%;background:#46d6a0;box-shadow:0 0 12px #46d6a088;display:inline-block;flex:none}
+
+.qp-main-top{margin-left:248px;padding:25px clamp(24px,4vw,58px) 0;display:flex;justify-content:space-between;align-items:center;color:#eaf1ff}.qp-main-top>div strong{display:block;font-size:17px;margin-top:6px}.qp-eyebrow{font-size:10px;letter-spacing:2px;color:#7daeff;font-weight:800}.qp-env{border:1px solid var(--border);border-radius:30px;padding:9px 13px;color:#aabbd4;font-size:11px;display:flex;gap:8px;align-items:center}
+
+.container{width:min(1120px,calc(100% - 300px))!important;margin:35px 48px 60px 296px!important;padding:0!important}.container>h1{font-size:clamp(27px,3vw,38px)!important;text-align:left!important;letter-spacing:-1.4px!important;margin:0 0 8px!important;color:#edf4ff!important;background:linear-gradient(100deg,#f4f7ff,#9bc6ff 58%,#b7a2ff)!important;-webkit-background-clip:text!important;background-clip:text!important}.subtitle{text-align:left!important;margin:0 0 30px!important;color:#91a3bf!important}
+
+.card,.input-area,.box{background:linear-gradient(145deg,rgba(17,28,47,.98),rgba(12,21,37,.98))!important;border:1px solid rgba(148,163,184,.16)!important;border-radius:17px!important;box-shadow:0 16px 42px rgba(0,0,0,.18)!important}.card{padding:25px!important}.card h2,.label{color:#dce9ff!important}.card h2{font-size:17px!important}.card input,input,textarea{background:#080f1d!important;color:#edf4ff!important;border:1px solid rgba(148,163,184,.2)!important;border-radius:11px!important;min-height:48px}.card input::placeholder,textarea::placeholder,input::placeholder{color:#7f92b0!important}.card input:focus,textarea:focus,input:focus{border-color:#649bff!important;box-shadow:0 0 0 3px rgba(83,137,255,.13)!important}.connect-button,.send-button{background:linear-gradient(105deg,#347cf6,#6957e9)!important;color:#fff!important}.disconnect-button,.mic-off-button{background:rgba(190,42,71,.13)!important;color:#ff9aaa!important;border:1px solid rgba(251,113,133,.25)!important}.mic-on-button{background:rgba(16,185,129,.13)!important;color:#70e8bd!important;border:1px solid rgba(74,222,128,.25)!important}
+
+.mode-buttons{margin-top:25px!important}.mode-button{background:#101b2e!important;color:#aebed6!important;border:1px solid var(--border)!important}.mode-button.active{background:linear-gradient(100deg,rgba(49,112,231,.28),rgba(120,91,229,.23))!important;color:white!important;border-color:rgba(101,168,255,.48)!important}.input-area{padding:20px!important}.question-input{min-height:105px!important}.box{padding:21px!important}.label{font-size:14px!important}.schema-info,#databaseStatus{background:#091321!important;color:#a8bad5!important;border:1px solid var(--border)!important}.connected,.success{color:#55dfa9!important}.error{color:#ff8297!important}#sql{background:#07111e!important;border-color:rgba(97,230,223,.22)!important;color:#70e9df!important}table{background:#0a1423!important}th{background:#172640!important;color:#a9caff!important}td{color:#dce6f5!important}tr:hover td{background:rgba(101,168,255,.06)!important}.chart-wrapper{background:#091321!important}
+
+@media(max-width:900px){.qp-sidebar{width:76px;padding:20px 10px}.qp-brand{padding:0 8px 32px}.qp-brand>div:last-child,.qp-nav-label,.qp-nav span,.qp-sidebar-footer div{display:none}.qp-nav{justify-content:center;padding:0}.qp-sidebar-footer{justify-content:center}.qp-main-top{margin-left:76px;padding:20px 22px 0}.container{width:calc(100% - 120px)!important;margin:28px 22px 45px 98px!important}}
+
+@media(max-width:600px){.qp-sidebar{width:58px;padding:15px 7px}.qp-brand-mark{width:36px;height:36px}.qp-nav{height:40px}.qp-main-top{margin-left:58px;padding:16px 14px 0}.qp-env{display:none}.container{width:calc(100% - 82px)!important;margin:22px 12px 35px 70px!important}.card{padding:17px!important}.card input{width:100%!important;margin-right:0!important}.mode-buttons{flex-direction:column}.input-buttons{display:flex;flex-wrap:wrap}.input-buttons button{flex:1}.box{padding:15px!important}}
+
+</style>
+
+<style>
+.qp-page{display:none}.qp-page.active-page{display:block}
+.qp-page>h1{text-align:left;margin:0 0 8px;font-size:clamp(28px,3vw,38px)}
+.qp-page>.subtitle{margin:0 0 28px}
+.qp-main-top{min-height:88px}
+.qp-welcome{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:30px!important}
+.qp-welcome h2{font-size:25px;margin:12px 0}
+.qp-welcome p{color:var(--muted);line-height:1.7;max-width:650px}
+.qp-dashboard-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:20px 0}
+.qp-shortcut{text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:10px;min-height:145px;color:var(--text)}
+.qp-shortcut>span{font-size:24px;color:#8db5ff}.qp-shortcut strong{font-size:15px}.qp-shortcut small{color:var(--muted);font-size:12px}
+.qp-steps{color:#b8c8df;line-height:2;padding-left:22px}
+.qp-sql-toolbar{display:flex;align-items:center;justify-content:space-between;color:#7faaff;font-size:10px;letter-spacing:1.5px;margin-bottom:12px}
+.qp-sql-toolbar button{padding:9px 14px}
+.qp-empty-note{padding:24px;border:1px dashed rgba(148,163,184,.25);border-radius:14px;color:var(--muted);text-align:center;background:rgba(8,15,29,.45)}
+#page-sql #sqlBoxContainer{display:block!important;margin-top:0}
+#page-analytics #recordsBox,#page-analytics #chartBox{margin-top:16px}
+@media(max-width:700px){.qp-welcome{display:block}.qp-welcome button{margin-top:15px}.qp-dashboard-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<aside class="qp-sidebar" aria-label="Main navigation">
+  <div class="qp-brand"><div class="qp-brand-mark">✦</div><div><strong>QueryPilot</strong><span>AI DATABASE STUDIO</span></div></div>
+  <div class="qp-nav-label">WORKSPACE</div>
+  <a class="qp-nav active" href="#dashboard" data-page="dashboard">▦ <span>Dashboard</span></a>
+  <a class="qp-nav" href="#assistant" data-page="assistant">✧ <span>AI Assistant</span></a>
+  <a class="qp-nav" href="#sql" data-page="sql">⌘ <span>SQL Workspace</span></a>
+  <a class="qp-nav" href="#analytics" data-page="analytics">▥ <span>Analytics &amp; Results</span></a>
+  <div class="qp-nav-label qp-db-label">DATABASE</div>
+  <a class="qp-nav" href="#connections" data-page="connections">◉ <span>Connections</span></a>
+  <div class="qp-sidebar-footer"><span class="qp-live-dot"></span><div><strong>Local workspace</strong><small>FastAPI · MySQL</small></div></div>
+</aside>
+<div class="qp-main-top">
+  <div><span class="qp-eyebrow">AI-POWERED DATA WORKSPACE</span><strong id="currentPageTitle">Dashboard</strong></div>
+  <span class="qp-env"><i></i> Local environment</span>
+</div>
+<main class="container">
+  <section class="qp-page active-page" id="page-dashboard">
+    <h1>🎙️ QueryPilot</h1>
+    <p class="subtitle">Your AI-powered database workspace. Each tool has its own dedicated screen.</p>
+    <div class="qp-welcome card">
+      <div><span class="qp-eyebrow">WELCOME TO QUERY PILOT</span><h2>Explore your data using natural language.</h2><p>Connect a database, ask questions in text or voice, inspect generated SQL, and explore results in analytics.</p></div>
+      <button class="send-button" data-go-page="assistant">Open AI Assistant →</button>
+    </div>
+    <div class="qp-dashboard-grid">
+      <button class="qp-shortcut card" data-go-page="assistant"><span>✧</span><strong>AI Assistant</strong><small>Ask questions using text or voice</small></button>
+      <button class="qp-shortcut card" data-go-page="sql"><span>⌘</span><strong>SQL Workspace</strong><small>Inspect SQL generated by Gemini</small></button>
+      <button class="qp-shortcut card" data-go-page="analytics"><span>▥</span><strong>Analytics &amp; Results</strong><small>View returned records and charts</small></button>
+      <button class="qp-shortcut card" data-go-page="connections"><span>◉</span><strong>Connections</strong><small>Connect or disconnect MySQL</small></button>
+    </div>
+    <div class="card"><h2>How to use QueryPilot</h2><ol class="qp-steps"><li>Open <b>Connections</b> and connect your MySQL database.</li><li>Open <b>AI Assistant</b> and ask a question.</li><li>Check the generated query in <b>SQL Workspace</b>.</li><li>Open <b>Analytics &amp; Results</b> to view records and charts.</li></ol></div>
+  </section>
+
+  <section class="qp-page" id="page-assistant">
+    <h1>AI Assistant</h1>
+    <p class="subtitle">Ask questions about your connected database using natural language or your voice.</p>
+    <div class="mode-buttons">
+<button class="mode-button active" id="databaseMode">
+
+            🎙️ Ask Database
+
+        </button>
+<button class="mode-button" id="sqlMode">
+
+            💻 Generate SQL
+
+        </button>
+</div>
+    <div class="input-area" id="questionWorkspace">
+<textarea class="question-input" id="questionInput" placeholder="Ask anything about your database..."></textarea>
+<div class="input-buttons">
+<button class="send-button" id="sendButton">
+
+                ➤ Send
+
+            </button>
+<button class="mic-on-button" id="micOnButton">
+
+                🎤 Mic ON
+
+            </button>
+<button class="mic-off-button" id="micOffButton">
+
+                🛑 Mic OFF
+
+            </button>
+</div>
+</div>
+    <div id="status">
+
+        Connect a database first
+
+    </div>
+    
+    <div class="box"><div class="label">🗣️ You asked:</div><div id="question">Nothing yet...</div></div>
+    <div class="box" id="answerBoxContainer">
+<div class="label">
+
+            🤖 AI Answer:
+
+        </div>
+<div id="answer">
+
+            Connect your database and ask a question.
+
+        </div>
+</div>
+    <div class="box hidden" id="historyBox">
+<div class="label">
+
+        💬 Conversation History:
+
+    </div>
+<div class="history-list" id="historyList">
+<div class="history-empty">
+
+            No conversation history yet.
+
+        </div>
+</div>
+</div>
+  </section>
+
+  <section class="qp-page" id="page-sql">
+    <h1>SQL Workspace</h1>
+    <p class="subtitle">Review the SQL generated from your natural-language question.</p>
+    <div class="qp-sql-toolbar"><span>READ-ONLY SQL OUTPUT</span><button type="button" class="mode-button" id="copySQLButton">Copy SQL</button></div>
+    <div class="box hidden" id="sqlBoxContainer">
+<div class="label">
+
+            💻 Generated SQL:
+
+        </div>
+<div id="sql">
+
+            No SQL generated yet.
+
+        </div>
+</div>
+  </section>
+
+  <section class="qp-page" id="page-analytics">
+    <h1>Analytics &amp; Results</h1>
+    <p class="subtitle">Explore the records returned by your latest database query and its visual summary.</p>
+    <div class="qp-empty-note" id="analyticsEmpty">Run a successful query in AI Assistant to see records and charts here.</div>
+    <div class="box hidden" id="recordsBox">
+<div class="label">
+
+            📊 Database Records:
+
+        </div>
+<div class="result-summary" id="resultSummary"></div>
+<div id="recordsContainer"></div>
+</div>
+    <div class="box hidden" id="chartBox">
+<div class="label">📈 Visual Analytics:</div>
+<div class="chart-wrapper">
+<canvas id="resultChart"></canvas>
+<div class="chart-message hidden" id="chartMessage"></div>
+</div>
+</div>
+  </section>
+
+  <section class="qp-page" id="page-connections">
+    <h1>Database Connections</h1>
+    <p class="subtitle">Connect your MySQL database to start asking questions.</p>
+    <div class="card" id="databaseConnection">
+<h2>
+
+            🔗 Connect Your Database
+
+        </h2>
+<input id="dbHost" placeholder="Host" type="text" value="localhost"/>
+<input id="dbPort" placeholder="Port" type="number" value="3306"/>
+<input id="dbName" placeholder="Database Name" type="text"/>
+<input id="dbUsername" placeholder="Username" type="text"/>
+<input id="dbPassword" placeholder="Password" type="password"/>
+<button class="connect-button" id="connectDatabaseButton">
+
+            🔗 Connect Database
+
+        </button>
+<button class="disconnect-button" id="disconnectDatabaseButton">
+
+    🔌 Disconnect Database
+
+</button>
+<p id="databaseStatus">
+
+            No database connected
+
+        </p>
+<div class="schema-info hidden" id="schemaInfo"></div>
+</div>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+
+/* ============================================================
+
+   CONFIGURATION
+
+   ============================================================ */
+
+const API_BASE_URL =
+
+    "http://127.0.0.1:8000";
+
+/* ============================================================
+
+   GLOBAL VARIABLES
+
+   ============================================================ */
+
+let databaseSessionId = null;
+
+let currentMode = "database";
+
+let lastGeneratedSQL = "";
+
+let recognition = null;
+
+let isListening = false;
+
+let resultChart = null;
+
+/* ============================================================
+
+   ELEMENTS
+
+   ============================================================ */
+
+const questionInput =
+
+    document.getElementById(
+
+        "questionInput"
+
+    );
+
+const sendButton =
+
+    document.getElementById(
+
+        "sendButton"
+
+    );
+
+const micOnButton =
+
+    document.getElementById(
+
+        "micOnButton"
+
+    );
+
+const micOffButton =
+
+    document.getElementById(
+
+        "micOffButton"
+
+    );
+
+const status =
+
+    document.getElementById(
+
+        "status"
+
+    );
+
+const questionBox =
+
+    document.getElementById(
+
+        "question"
+
+    );
+
+const sqlBox =
+
+    document.getElementById(
+
+        "sql"
+
+    );
+
+const answerBox =
+
+    document.getElementById(
+
+        "answer"
+
+    );
+
+const answerBoxContainer =
+
+    document.getElementById(
+
+        "answerBoxContainer"
+
+    );
+
+const sqlBoxContainer =
+
+    document.getElementById(
+
+        "sqlBoxContainer"
+
+    );
+
+const recordsBox =
+
+    document.getElementById(
+
+        "recordsBox"
+
+    );
+
+const recordsContainer =
+
+    document.getElementById(
+
+        "recordsContainer"
+
+    );
+
+const resultSummary =
+
+    document.getElementById(
+
+        "resultSummary"
+
+    );
+
+const chartBox = document.getElementById("chartBox");
+
+const resultChartCanvas = document.getElementById("resultChart");
+
+const chartMessage = document.getElementById("chartMessage");
+
+const databaseMode =
+
+    document.getElementById(
+
+        "databaseMode"
+
+    );
+
+const sqlMode =
+
+    document.getElementById(
+
+        "sqlMode"
+
+    );
+
+const connectDatabaseButton =
+
+    document.getElementById(
+
+        "connectDatabaseButton"
+
+    );
+
+const disconnectDatabaseButton =
+
+    document.getElementById(
+
+        "disconnectDatabaseButton"
+
+    );
+
+const databaseStatus =
+
+    document.getElementById(
+
+        "databaseStatus"
+
+    );
+
+const schemaInfo =
+
+    document.getElementById(
+
+        "schemaInfo"
+
+    );
+
+const historyBox =
+
+    document.getElementById("historyBox");
+
+const historyList =
+
+    document.getElementById("historyList");
+
+/* ============================================================
+
+   CONNECT DATABASE
+
+   ============================================================ */
+
+connectDatabaseButton.addEventListener(
+
+    "click",
+
+    connectDatabase
+
+);
+
+disconnectDatabaseButton.addEventListener(
+
+    "click",
+
+    disconnectDatabase
+
+);
+
+async function connectDatabase() {
+
+    const host =
+
+        document
+
+            .getElementById("dbHost")
+
+            .value
+
+            .trim();
+
+    const port =
+
+        Number(
+
+            document
+
+                .getElementById("dbPort")
+
+                .value
+
+        );
+
+    const database =
+
+        document
+
+            .getElementById("dbName")
+
+            .value
+
+            .trim();
+
+    const username =
+
+        document
+
+            .getElementById("dbUsername")
+
+            .value
+
+            .trim();
+
+    const password =
+
+        document
+
+            .getElementById("dbPassword")
+
+            .value;
+
+    if (
+
+        !host ||
+
+        !port ||
+
+        !database ||
+
+        !username ||
+
+        !password
+
+    ) {
+
+        databaseStatus.innerText =
+
+            "❌ Please fill in all database fields.";
+
+        databaseStatus.className =
+
+            "error";
+
+        return;
+
+    }
+
+    databaseStatus.innerText =
+
+        "🔄 Connecting...";
+
+    databaseStatus.className =
+
+        "";
+
+    try {
+
+        const response =
+
+            await fetch(
+
+                API_BASE_URL +
+
+                "/connect-database",
+
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+
+                            "application/json"
+
+                    },
+
+                    body: JSON.stringify({
+
+                        host: host,
+
+                        port: port,
+
+                        database: database,
+
+                        username: username,
+
+                        password: password
+
+                    })
+
+                }
+
+            );
+
+        const data =
+
+            await response.json();
+
+        if (
+
+            data.status ===
+
+            "success"
+
+        ) {
+
+            databaseSessionId =
+
+                data.session_id;
+
+            databaseStatus.innerText =
+
+                "✅ Connected to " +
+
+                data.database +
+
+                "\n\nTables: " +
+
+                data.tables.join(", ");
+
+            databaseStatus.className =
+
+                "connected";
+
+            status.innerText =
+
+                "✅ Database connected. Ask anything!";
+
+            status.className =
+
+                "success";
+
+            showSchema(
+
+                data.schema
+
+            );
+
+            answerBox.innerText =
+
+                "Your database is ready. Ask me anything!";
+
+            questionBox.innerText =
+
+                "Nothing yet...";
+
+            lastGeneratedSQL =
+
+                "";
+
+            sqlBox.innerText =
+
+                "No SQL generated yet.";
+
+            sqlBoxContainer.classList.add(
+
+                "hidden"
+
+            );
+
+            answerBoxContainer.classList.remove(
+
+                "hidden"
+
+            );
+
+            clearRecords();
+
+            clearHistory();
+
+        }
+
+        else {
+
+            databaseSessionId =
+
+                null;
+
+            databaseStatus.innerText =
+
+                "❌ " +
+
+                (
+
+                    data.message ||
+
+                    "Database connection failed."
+
+                );
+
+            databaseStatus.className =
+
+                "error";
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+
+            "Connection error:",
+
+            error
+
+        );
+
+        databaseSessionId =
+
+            null;
+
+        databaseStatus.innerText =
+
+            "❌ Could not reach FastAPI backend.";
+
+        databaseStatus.className =
+
+            "error";
+
+    }
+
+}
+
+async function disconnectDatabase() {
+
+    if (!databaseSessionId) {
+
+        databaseStatus.innerText =
+
+            "❌ No database is currently connected.";
+
+        databaseStatus.className = "error";
+
+        return;
+
+    }
+
+    try {
+
+        databaseStatus.innerText =
+
+            "🔄 Disconnecting...";
+
+        databaseStatus.className = "";
+
+        const response = await fetch(
+
+            API_BASE_URL +
+
+            "/disconnect-database?session_id=" +
+
+            encodeURIComponent(databaseSessionId),
+
+            {
+
+                method: "POST"
+
+            }
+
+        );
+
+        const data = await response.json();
+
+        if (data.status === "success") {
+
+            databaseSessionId = null;
+
+            databaseStatus.innerText =
+
+                "No database connected";
+
+            databaseStatus.className = "";
+
+            schemaInfo.innerText = "";
+
+            schemaInfo.classList.add("hidden");
+
+            status.innerText =
+
+                "Connect a database first";
+
+            status.className = "";
+
+            answerBox.innerText =
+
+                "Connect your database and ask a question.";
+
+            questionBox.innerText =
+
+                "Nothing yet...";
+
+            lastGeneratedSQL = "";
+
+            sqlBox.innerText =
+
+                "No SQL generated yet.";
+
+            sqlBoxContainer.classList.add("hidden");
+
+            answerBoxContainer.classList.remove("hidden");
+
+            clearRecords();
+
+            clearHistory();
+
+            questionInput.value = "";
+
+            if (isListening) {
+
+                stopMicrophone();
+
+            }
+
+        } else {
+
+            databaseStatus.innerText =
+
+                "❌ " +
+
+                (data.message ||
+
+                 "Could not disconnect database.");
+
+            databaseStatus.className = "error";
+
+        }
+
+    } catch (error) {
+
+        console.error(
+
+            "Disconnect error:",
+
+            error
+
+        );
+
+        databaseStatus.innerText =
+
+            "❌ Could not reach FastAPI backend.";
+
+        databaseStatus.className = "error";
+
+    }
+
+}
+
+/* ============================================================
+
+   SHOW SCHEMA
+
+   ============================================================ */
+
+function showSchema(schema) {
+
+    if (!schema) {
+
+        schemaInfo.classList.add(
+
+            "hidden"
+
+        );
+
+        return;
+
+    }
+
+    const tables =
+
+        Object.keys(schema);
+
+    let text =
+
+        "📚 Schema: ";
+
+    tables.forEach(
+
+        function(tableName, index) {
+
+            const columns =
+
+                schema[tableName]
+
+                    .map(
+
+                        function(column) {
+
+                            return column.name;
+
+                        }
+
+                    )
+
+                    .join(", ");
+
+            text +=
+
+                tableName +
+
+                " (" +
+
+                columns +
+
+                ")";
+
+            if (
+
+                index <
+
+                tables.length - 1
+
+            ) {
+
+                text += " | ";
+
+            }
+
+        }
+
+    );
+
+    schemaInfo.innerText =
+
+        text;
+
+    schemaInfo.classList.remove(
+
+        "hidden"
+
+    );
+
+}
+
+/* ============================================================
+
+   ASK DATABASE MODE
+
+   ============================================================ */
+
+databaseMode.addEventListener(
+
+    "click",
+
+    function() {
+
+        currentMode =
+
+            "database";
+
+        databaseMode.classList.add(
+
+            "active"
+
+        );
+
+        sqlMode.classList.remove(
+
+            "active"
+
+        );
+
+        /*
+
+         * In Ask Database mode:
+
+         *
+
+         * Show:
+
+         * - AI Answer
+
+         * - Database Records
+
+         *
+
+         * Hide:
+
+         * - Generated SQL
+
+         */
+
+        sqlBoxContainer.classList.add(
+
+            "hidden"
+
+        );
+
+        answerBoxContainer.classList.remove(
+
+            "hidden"
+
+        );
+
+        if (recordsContainer.innerHTML.trim() !== "") {
+
+            recordsBox.classList.remove("hidden");
+
+        }
+
+        if (chartBox.dataset.hasChart === "true") {
+
+            chartBox.classList.remove("hidden");
+
+        }
+
+        if (databaseSessionId) {
+
+            status.innerText =
+
+                "Ask anything about your database.";
+
+        }
+
+        else {
+
+            status.innerText =
+
+                "Connect a database first.";
+
+        }
+
+        status.className =
+
+            "";
+
+    }
+
+);
+
+/* ============================================================
+
+   GENERATE SQL MODE
+
+   ============================================================ */
+
+sqlMode.addEventListener(
+
+    "click",
+
+    function() {
+
+        currentMode =
+
+            "sql";
+
+        sqlMode.classList.add(
+
+            "active"
+
+        );
+
+        databaseMode.classList.remove(
+
+            "active"
+
+        );
+
+        /*
+
+         * Generate SQL mode:
+
+         *
+
+         * SHOW ONLY SQL.
+
+         *
+
+         * Hide:
+
+         * - AI Answer
+
+         * - Database Records
+
+         */
+
+        answerBoxContainer.classList.add(
+
+            "hidden"
+
+        );
+
+        recordsBox.classList.add(
+
+            "hidden"
+
+        );
+
+        chartBox.classList.add(
+
+            "hidden"
+
+        );
+
+        sqlBoxContainer.classList.remove(
+
+            "hidden"
+
+        );
+
+        if (lastGeneratedSQL) {
+
+            sqlBox.innerText =
+
+                lastGeneratedSQL;
+
+            status.innerText =
+
+                "✅ SQL generated.";
+
+            status.className =
+
+                "success";
+
+        }
+
+        else {
+
+            sqlBox.innerText =
+
+                "Ask a question to generate SQL.";
+
+            status.innerText =
+
+                "Enter your question and click Send.";
+
+            status.className =
+
+                "";
+
+        }
+
+    }
+
+);
+
+/* ============================================================
+
+   SPEECH RECOGNITION
+
+   ============================================================ */
+
+const SpeechRecognition =
+
+    window.SpeechRecognition ||
+
+    window.webkitSpeechRecognition;
+
+if (!SpeechRecognition) {
+
+    micOnButton.disabled =
+
+        true;
+
+    status.innerText =
+
+        "❌ Speech recognition is not supported. Use Google Chrome.";
+
+    status.className =
+
+        "error";
+
+}
+
+else {
+
+    recognition =
+
+        new SpeechRecognition();
+
+    recognition.lang =
+
+        "en-IN";
+
+    recognition.continuous =
+
+        true;
+
+    recognition.interimResults =
+
+        true;
+
+    micOnButton.addEventListener(
+
+        "click",
+
+        startMicrophone
+
+    );
+
+    micOffButton.addEventListener(
+
+        "click",
+
+        stopMicrophone
+
+    );
+
+    function startMicrophone() {
+
+        if (!databaseSessionId) {
+
+            status.innerText =
+
+                "❌ Connect a database first.";
+
+            status.className =
+
+                "error";
+
+            return;
+
+        }
+
+        if (isListening) {
+
+            status.innerText =
+
+                "🎙️ Microphone is already ON.";
+
+            status.className =
+
+                "success";
+
+            return;
+
+        }
+
+        try {
+
+            recognition.start();
+
+            isListening =
+
+                true;
+
+            micOnButton.classList.add(
+
+                "active"
+
+            );
+
+            status.innerText =
+
+                "🎙️ Microphone ON — Speak now.";
+
+            status.className =
+
+                "success";
+
+        }
+
+        catch (error) {
+
+            console.log(
+
+                "Microphone error:",
+
+                error
+
+            );
+
+        }
+
+    }
+
+    function stopMicrophone() {
+
+        try {
+
+            recognition.stop();
+
+        }
+
+        catch (error) {
+
+            console.log(
+
+                "Microphone stop:",
+
+                error
+
+            );
+
+        }
+
+        isListening =
+
+            false;
+
+        micOnButton.classList.remove(
+
+            "active"
+
+        );
+
+        status.innerText =
+
+            "🛑 Microphone OFF.";
+
+        status.className =
+
+            "warning";
+
+    }
+
+    recognition.onresult =
+
+        function(event) {
+
+            let finalText =
+
+                "";
+
+            let interimText =
+
+                "";
+
+            for (
+
+                let i = event.resultIndex;
+
+                i < event.results.length;
+
+                i++
+
+            ) {
+
+                const transcript =
+
+                    event.results[i][0]
+
+                        .transcript;
+
+                if (
+
+                    event.results[i].isFinal
+
+                ) {
+
+                    finalText +=
+
+                        transcript +
+
+                        " ";
+
+                }
+
+                else {
+
+                    interimText +=
+
+                        transcript;
+
+                }
+
+            }
+
+            if (
+
+                finalText.trim()
+
+            ) {
+
+                questionInput.value =
+
+                    (
+
+                        questionInput.value +
+
+                        " " +
+
+                        finalText
+
+                    ).trim();
+
+            }
+
+            if (
+
+                interimText.trim()
+
+            ) {
+
+                status.innerText =
+
+                    "🎙️ Listening: " +
+
+                    interimText;
+
+                status.className =
+
+                    "success";
+
+            }
+
+        };
+
+    recognition.onend =
+
+        function() {
+
+            if (isListening) {
+
+                try {
+
+                    recognition.start();
+
+                }
+
+                catch (error) {
+
+                    console.log(
+
+                        "Recognition restart:",
+
+                        error
+
+                    );
+
+                }
+
+            }
+
+        };
+
+    recognition.onerror =
+
+        function(event) {
+
+            console.error(
+
+                "Speech error:",
+
+                event.error
+
+            );
+
+            if (
+
+                event.error ===
+
+                "not-allowed"
+
+            ) {
+
+                isListening =
+
+                    false;
+
+                micOnButton.classList.remove(
+
+                    "active"
+
+                );
+
+                status.innerText =
+
+                    "❌ Microphone permission denied.";
+
+                status.className =
+
+                    "error";
+
+                return;
+
+            }
+
+            if (
+
+                event.error ===
+
+                "no-speech"
+
+            ) {
+
+                status.innerText =
+
+                    "🎙️ No speech detected. Still listening...";
+
+                status.className =
+
+                    "warning";
+
+                return;
+
+            }
+
+            status.innerText =
+
+                "❌ Microphone error: " +
+
+                event.error;
+
+            status.className =
+
+                "error";
+
+        };
+
+}
+
+/* ============================================================
+
+   SEND BUTTON
+
+   ============================================================ */
+
+sendButton.addEventListener(
+
+    "click",
+
+    sendCurrentQuestion
+
+);
+
+/* ============================================================
+
+   ENTER KEY
+
+   ============================================================ */
+
+questionInput.addEventListener(
+
+    "keydown",
+
+    function(event) {
+
+        if (
+
+            event.key === "Enter" &&
+
+            !event.shiftKey
+
+        ) {
+
+            event.preventDefault();
+
+            sendCurrentQuestion();
+
+        }
+
+    }
+
+);
+
+/* ============================================================
+
+   SEND CURRENT QUESTION
+
+   ============================================================ */
+
+function sendCurrentQuestion() {
+
+    const question =
+
+        questionInput.value.trim();
+
+    if (!question) {
+
+        status.innerText =
+
+            "❌ Please type or speak a question.";
+
+        status.className =
+
+            "error";
+
+        return;
+
+    }
+
+    if (!databaseSessionId) {
+
+        status.innerText =
+
+            "❌ Connect a database first.";
+
+        status.className =
+
+            "error";
+
+        return;
+
+    }
+
+    if (isListening) {
+
+        stopMicrophone();
+
+    }
+
+    questionBox.innerText =
+
+        question;
+
+    /*
+
+     * ========================================================
+
+     * GENERATE SQL MODE
+
+     * ========================================================
+
+     */
+
+    if (
+
+        currentMode ===
+
+        "sql"
+
+    ) {
+
+        navigateToPage("sql");
+        generateSQLOnly(
+            question
+        );
+
+        return;
+
+    }
+
+    /*
+
+     * ========================================================
+
+     * ASK DATABASE MODE
+
+     * ========================================================
+
+     */
+
+    answerBoxContainer.classList.remove(
+
+        "hidden"
+
+    );
+
+    sqlBoxContainer.classList.add(
+
+        "hidden"
+
+    );
+
+    answerBox.innerText =
+
+        "🤖 Processing your question...";
+
+    status.innerText =
+
+        "🤖 Gemini is generating SQL and querying your database...";
+
+    status.className =
+
+        "warning";
+
+    askDatabase(
+
+        question
+
+    );
+
+}
+
+/* ============================================================
+
+   GENERATE SQL ONLY
+
+   ============================================================ */
+
+async function generateSQLOnly(
+
+    question
+
+) {
+
+    sqlBoxContainer.classList.remove(
+
+        "hidden"
+
+    );
+
+    answerBoxContainer.classList.add(
+
+        "hidden"
+
+    );
+
+    recordsBox.classList.add(
+
+        "hidden"
+
+    );
+
+    chartBox.classList.add(
+
+        "hidden"
+
+    );
+
+    sqlBox.innerText =
+
+        "Generating SQL...";
+
+    status.innerText =
+
+        "🤖 Gemini is generating SQL...";
+
+    status.className =
+
+        "warning";
+
+    try {
+
+        const response =
+
+            await fetch(
+
+                API_BASE_URL +
+
+                "/generate-sql",
+
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+
+                            "application/json"
+
+                    },
+
+                    body: JSON.stringify({
+
+                        question:
+
+                            question,
+
+                        session_id:
+
+                            databaseSessionId
+
+                    })
+
+                }
+
+            );
+
+        const data =
+
+            await response.json();
+
+        console.log(
+
+            "Generate SQL response:",
+
+            data
+
+        );
+
+        if (
+
+            data.status ===
+
+            "success"
+
+        ) {
+
+            const generatedSQL = data.generated_sql || data.sql || data.query || "";
+            lastGeneratedSQL = generatedSQL;
+            sqlBox.innerText = generatedSQL || "The backend did not return SQL.";
+
+            status.innerText =
+
+                "✅ SQL generated successfully.";
+
+            status.className =
+
+                "success";
+
+        }
+
+        else {
+
+            sqlBox.innerText =
+
+                data.message ||
+
+                "Could not generate SQL.";
+
+            status.innerText =
+
+                "❌ SQL generation failed.";
+
+            status.className =
+
+                "error";
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+
+            "Generate SQL error:",
+
+            error
+
+        );
+
+        sqlBox.innerText =
+
+            "Could not reach FastAPI backend.";
+
+        status.innerText =
+
+            "❌ Could not reach FastAPI.";
+
+        status.className =
+
+            "error";
+
+    }
+
+}
+
+/* ============================================================
+
+   ASK DATABASE
+
+   ============================================================ */
+
+async function askDatabase(
+
+    question
+
+) {
+
+    try {
+
+        const response =
+
+            await fetch(
+
+                API_BASE_URL +
+
+                "/query",
+
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+
+                            "application/json"
+
+                    },
+
+                    body: JSON.stringify({
+
+                        question:
+
+                            question,
+
+                        session_id:
+
+                            databaseSessionId
+
+                    })
+
+                }
+
+            );
+
+        const data =
+
+            await response.json();
+
+        console.log(
+
+            "Ask Database response:",
+
+            data
+
+        );
+
+        if (
+
+            data.generated_sql
+
+        ) {
+
+            const generatedSQL = data.generated_sql || data.sql || data.query || "";
+            lastGeneratedSQL = generatedSQL;
+            sqlBox.innerText = generatedSQL || "The backend did not return SQL.";
+
+        }
+
+        if (
+
+            data.status ===
+
+            "success"
+
+        ) {
+
+            answerBox.innerText =
+
+                data.answer ||
+
+                "Query completed successfully.";
+
+            renderRecords(
+
+                data.columns || [],
+
+                data.rows || [],
+
+                data.row_count || 0
+
+            );
+
+            renderChart(
+
+                data.chart || { type: "table" },
+
+                data.columns || [],
+
+                data.rows || []
+
+            );
+
+            await loadConversationHistory();
+
+            status.innerText =
+
+                "✅ Answer received.";
+
+            status.className =
+
+                "success";
+
+        }
+
+        else if (
+
+            data.status ===
+
+            "rejected"
+
+        ) {
+
+            answerBox.innerText =
+
+                data.message ||
+
+                "The generated SQL was rejected.";
+
+            status.innerText =
+
+                "🛡️ Query rejected.";
+
+            status.className =
+
+                "error";
+
+        }
+
+        else {
+
+            answerBox.innerText =
+
+                data.message ||
+
+                "Something went wrong.";
+
+            status.innerText =
+
+                "❌ Request failed.";
+
+            status.className =
+
+                "error";
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+
+            "Database request error:",
+
+            error
+
+        );
+
+        status.innerText =
+
+            "❌ Could not reach FastAPI.";
+
+        status.className =
+
+            "error";
+
+        answerBox.innerText =
+
+            "Please make sure FastAPI is running at " +
+
+            API_BASE_URL;
+
+    }
+
+}
+
+/* ============================================================
+
+   DYNAMIC DATABASE RECORD TABLE
+
+   ============================================================ */
+
+function renderRecords(
+
+    columns,
+
+    rows,
+
+    rowCount
+
+) {
+
+    const analyticsEmpty = document.getElementById("analyticsEmpty");
+    if (analyticsEmpty) analyticsEmpty.classList.add("hidden");
+
+    recordsBox.classList.remove(
+
+        "hidden"
+
+    );
+
+    resultSummary.innerText =
+
+        "Found " +
+
+        rowCount +
+
+        " record" +
+
+        (
+
+            rowCount === 1
+
+                ? ""
+
+                : "s"
+
+        ) +
+
+        ".";
+
+    if (!columns.length) {
+
+        recordsContainer.innerHTML =
+
+            '<div class="empty-table">' +
+
+            'No columns returned.' +
+
+            '</div>';
+
+        return;
+
+    }
+
+    if (!rows.length) {
+
+        recordsContainer.innerHTML =
+
+            '<div class="empty-table">' +
+
+            'No matching records found.' +
+
+            '</div>';
+
+        return;
+
+    }
+
+    /*
+
+     * Create table dynamically.
+
+     *
+
+     * Nothing is hardcoded here.
+
+     */
+
+    const table =
+
+        document.createElement(
+
+            "table"
+
+        );
+
+    /* ========================================================
+
+       TABLE HEADER
+
+       ======================================================== */
+
+    const thead =
+
+        document.createElement(
+
+            "thead"
+
+        );
+
+    const headerRow =
+
+        document.createElement(
+
+            "tr"
+
+        );
+
+    columns.forEach(
+
+        function(column) {
+
+            const th =
+
+                document.createElement(
+
+                    "th"
+
+                );
+
+            th.innerText =
+
+                column;
+
+            headerRow.appendChild(
+
+                th
+
+            );
+
+        }
+
+    );
+
+    thead.appendChild(
+
+        headerRow
+
+    );
+
+    table.appendChild(
+
+        thead
+
+    );
+
+    /* ========================================================
+
+       TABLE BODY
+
+       ======================================================== */
+
+    const tbody =
+
+        document.createElement(
+
+            "tbody"
+
+        );
+
+    rows.forEach(
+
+        function(row) {
+
+            const tr =
+
+                document.createElement(
+
+                    "tr"
+
+                );
+
+            columns.forEach(
+
+                function(column) {
+
+                    const td =
+
+                        document.createElement(
+
+                            "td"
+
+                        );
+
+                    const value =
+
+                        row[column];
+
+                    if (
+
+                        value === null ||
+
+                        value === undefined
+
+                    ) {
+
+                        td.innerText =
+
+                            "NULL";
+
+                    }
+
+                    else if (
+
+                        typeof value ===
+
+                        "object"
+
+                    ) {
+
+                        td.innerText =
+
+                            JSON.stringify(
+
+                                value
+
+                            );
+
+                    }
+
+                    else {
+
+                        td.innerText =
+
+                            String(value);
+
+                    }
+
+                    tr.appendChild(
+
+                        td
+
+                    );
+
+                }
+
+            );
+
+            tbody.appendChild(
+
+                tr
+
+            );
+
+        }
+
+    );
+
+    table.appendChild(
+
+        tbody
+
+    );
+
+    /* ========================================================
+
+       TABLE WRAPPER
+
+       ======================================================== */
+
+    const wrapper =
+
+        document.createElement(
+
+            "div"
+
+        );
+
+    wrapper.className =
+
+        "table-wrapper";
+
+    wrapper.appendChild(
+
+        table
+
+    );
+
+    recordsContainer.innerHTML =
+
+        "";
+
+    recordsContainer.appendChild(
+
+        wrapper
+
+    );
+
+}
+
+/* ============================================================
+
+   AUTOMATIC VISUAL ANALYTICS
+
+   ============================================================ */
+
+function destroyChart() {
+
+    if (resultChart) {
+
+        resultChart.destroy();
+
+        resultChart = null;
+
+    }
+
+}
+
+function renderChart(chart, columns, rows) {
+
+    destroyChart();
+
+    if (!chart || chart.type !== "bar" || !chart.x || !chart.y || !rows.length) {
+
+        chartBox.classList.add("hidden");
+
+        chartBox.dataset.hasChart = "false";
+
+        return;
+
+    }
+
+    const labels = [];
+
+    const values = [];
+
+    rows.forEach(function(row) {
+
+        const labelValue = row[chart.x];
+
+        const numericValue = Number(row[chart.y]);
+
+        if (labelValue !== null && labelValue !== undefined && Number.isFinite(numericValue)) {
+
+            labels.push(String(labelValue));
+
+            values.push(numericValue);
+
+        }
+
+    });
+
+    if (!labels.length || typeof Chart === "undefined") {
+
+        chartBox.classList.add("hidden");
+
+        chartBox.dataset.hasChart = "false";
+
+        return;
+
+    }
+
+    chartBox.classList.remove("hidden");
+
+    chartBox.dataset.hasChart = "true";
+
+    resultChart = new Chart(resultChartCanvas, {
+
+        type: "bar",
+
+        data: {
+
+            labels: labels,
+
+            datasets: [{ label: chart.y, data: values, borderWidth: 1 }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                legend: { display: true },
+
+                title: { display: true, text: chart.y + " by " + chart.x }
+
+            },
+
+            scales: {
+
+                x: { ticks: { color: "#cbd5e1" } },
+
+                y: { beginAtZero: true, ticks: { color: "#cbd5e1" } }
+
+            }
+
+        }
+
+    });
+
+}
+
+/* ============================================================
+
+   CLEAR RECORDS
+
+   ============================================================ */
+
+function clearRecords() {
+
+    const analyticsEmpty = document.getElementById("analyticsEmpty");
+    if (analyticsEmpty) analyticsEmpty.classList.remove("hidden");
+
+    recordsBox.classList.add(
+
+        "hidden"
+
+    );
+
+    destroyChart();
+
+    chartBox.classList.add("hidden");
+
+    chartBox.dataset.hasChart = "false";
+
+    recordsContainer.innerHTML =
+
+        "";
+
+    resultSummary.innerText =
+
+        "";
+
+}
+
+/* ============================================================
+
+   CONVERSATION HISTORY
+
+   ============================================================ */
+
+async function loadConversationHistory() {
+
+    if (!databaseSessionId) {
+
+        clearHistory();
+
+        return;
+
+    }
+
+    try {
+
+        const response = await fetch(
+
+            API_BASE_URL +
+
+            "/history/" +
+
+            encodeURIComponent(databaseSessionId)
+
+        );
+
+        const data = await response.json();
+
+        if (
+
+            data.status === "success" &&
+
+            Array.isArray(data.conversation)
+
+        ) {
+
+            renderConversationHistory(
+
+                data.conversation
+
+            );
+
+        } else {
+
+            clearHistory();
+
+        }
+
+    } catch (error) {
+
+        console.error(
+
+            "History error:",
+
+            error
+
+        );
+
+        clearHistory();
+
+    }
+
+}
+
+function renderConversationHistory(history) {
+
+    if (
+
+        !history ||
+
+        history.length === 0
+
+    ) {
+
+        clearHistory();
+
+        return;
+
+    }
+
+    historyBox.classList.remove("hidden");
+
+    historyList.innerHTML = "";
+
+    history.forEach(function(item) {
+
+        const box =
+
+            document.createElement("div");
+
+        box.className =
+
+            "history-item";
+
+        const question =
+
+            document.createElement("div");
+
+        question.className =
+
+            "history-question";
+
+        question.innerText =
+
+            "🗣️ " +
+
+            (item.question || "Question");
+
+        const answer =
+
+            document.createElement("div");
+
+        answer.className =
+
+            "history-answer";
+
+        answer.innerText =
+
+            "🤖 " +
+
+            (item.answer || "No answer");
+
+        box.appendChild(question);
+
+        box.appendChild(answer);
+
+        if (item.generated_sql) {
+
+            const sql =
+
+                document.createElement("div");
+
+            sql.className =
+
+                "history-sql";
+
+            sql.innerText =
+
+                "SQL: " +
+
+                item.generated_sql;
+
+            box.appendChild(sql);
+
+        }
+
+        historyList.appendChild(box);
+
+    });
+
+}
+
+function clearHistory() {
+
+    historyBox.classList.add("hidden");
+
+    historyList.innerHTML =
+
+        '<div class="history-empty">' +
+
+        'No conversation history yet.' +
+
+        '</div>';
+
+}
+
+
+
+/* ============================================================
+   SEPARATE PAGE NAVIGATION
+   ============================================================ */
+const pageTitles = {
+    dashboard: "Dashboard",
+    assistant: "AI Assistant",
+    sql: "SQL Workspace",
+    analytics: "Analytics & Results",
+    connections: "Database Connections"
+};
+
+function navigateToPage(pageName) {
+    const pages = document.querySelectorAll(".qp-page");
+    pages.forEach(page => {
+        page.classList.toggle("active-page", page.id === "page-" + pageName);
+    });
+
+    document.querySelectorAll(".qp-nav").forEach(link => {
+        link.classList.toggle("active", link.dataset.page === pageName);
+    });
+
+    const title = document.getElementById("currentPageTitle");
+    if (title) title.innerText = pageTitles[pageName] || "QueryPilot";
+
+    if (pageName === "sql") {
+        sqlBoxContainer.classList.remove("hidden");
+        if (!lastGeneratedSQL) {
+            sqlBox.innerText = "No SQL generated yet. Generate SQL from the AI Assistant.";
+        }
+    }
+
+    if (pageName === "analytics") {
+        if (recordsContainer.innerHTML.trim()) recordsBox.classList.remove("hidden");
+        if (chartBox.dataset.hasChart === "true") chartBox.classList.remove("hidden");
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+document.querySelectorAll(".qp-nav[data-page]").forEach(link => {
+    link.addEventListener("click", event => {
+        event.preventDefault();
+        navigateToPage(link.dataset.page);
+    });
+});
+
+document.querySelectorAll("[data-go-page]").forEach(button => {
+    button.addEventListener("click", () => navigateToPage(button.dataset.goPage));
+});
+
+const copySQLButton = document.getElementById("copySQLButton");
+if (copySQLButton) {
+    copySQLButton.addEventListener("click", async () => {
+        const textToCopy = lastGeneratedSQL || sqlBox.innerText;
+        if (!textToCopy || textToCopy.includes("No SQL generated")) {
+            status.innerText = "No generated SQL to copy yet.";
+            return;
+        }
+        try {
+            await navigator.clipboard.writeText(textToCopy);
+            copySQLButton.innerText = "Copied!";
+            setTimeout(() => copySQLButton.innerText = "Copy SQL", 1500);
+        } catch (error) {
+            status.innerText = "Clipboard access unavailable. Select and copy the SQL manually.";
+        }
+    });
+}
+
+
+</script>
+
+</body>
+</html>s
